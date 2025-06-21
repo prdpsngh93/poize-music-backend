@@ -1,0 +1,38 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# dotenv env files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+debug.log
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Sequelize config (optional if using .env)
+config/config.json
+
+# Coverage reports
+coverage/
+
+# Build / compiled output
+dist/
+build/
+
+# Editor folders
+.vscode/
+.idea/
+
+# Optional: Ignore SQLite file if using it
+*.sqlite
+*.sqlite3
