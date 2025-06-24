@@ -2,7 +2,7 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model {}
+  class User extends Model { }
 
   User.init(
     {
@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       otp: DataTypes.STRING,
       otp_expiry: DataTypes.DATE,
+      is_oauth_login: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
     {
       sequelize,

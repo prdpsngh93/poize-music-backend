@@ -1,9 +1,11 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
+const cors = require("cors"); // ⬅️ Import CORS
 const authRoutes = require("./routes/auth.routes");
 
 // Middleware
+app.use(cors()); // ⬅️ Allow CORS for all origins
 app.use(express.json());
 
 // Routes
