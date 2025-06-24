@@ -54,14 +54,40 @@ exports.sendOTP = async (req, res) => {
   res.json({ message: "OTP sent to email" });
 };
 
-exports.resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
+exports.verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
   const user = await User.findOne({ where: { email } });
   if (!user || user.otp !== otp || new Date() > user.otp_expiry) {
     return res.status(400).json({ error: "Invalid or expired OTP" });
   }
 
-  const hashed = await bcrypt.hash(newPassword, 10);
-  await user.update({ password: hashed, otp: null, otp_expiry: null });
-  res.json({ message: "Password reset successful" });
+  // Optional: Clear OTP right after verification
+  await user.update({ otp: null, otp_expiry: null });
+
+  // Create temporary token valid for 10 minutes to allow password reset
+  const tempToken = jwt.sign(
+    { id: user.id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: "10m" }
+  );
+
+  res.json({ message: "OTP verified", token: tempToken });
+};
+
+exports.changePassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(decoded.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await user.update({ password: hashed });
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    res.status(400).json({ error: "Invalid or expired token" });
+  }
 };
