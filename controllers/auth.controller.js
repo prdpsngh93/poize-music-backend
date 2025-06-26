@@ -8,10 +8,10 @@ exports.register = async (req, res) => {
     const { name, email, password } = req.body;
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hash });
-    console.log("user" , user)
+    console.log("user", user)
     res.status(201).json({ user });
   } catch (err) {
-    console.log("err",err);
+    console.log("err", err);
     res.status(400).json({ error: err });
   }
 };
@@ -33,7 +33,7 @@ exports.login = async (req, res) => {
     httpOnly: true,
     // secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 60 * 60 * 1000, 
+    maxAge: 60 * 60 * 1000,
   });
 
   const { password: _, ...userData } = user.toJSON();
@@ -89,5 +89,29 @@ exports.changePassword = async (req, res) => {
     res.json({ message: "Password updated successfully" });
   } catch (err) {
     res.status(400).json({ error: "Invalid or expired token" });
+  }
+};
+
+
+exports.updateUserRole = async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const { newRole } = req.body;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Authorization token missing or invalid" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(decoded.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    await user.update({ role: newRole });
+    res.json({ message: "User role updated successfully", user });
+  } catch (err) {
+    console.error("Error verifying token or updating role:", err);
+    res.status(400).json({ error: "Invalid token or server error" });
   }
 };
