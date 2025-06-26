@@ -14,8 +14,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       password: DataTypes.STRING,
       role: {
-        type: DataTypes.STRING,
-        defaultValue: 'user',
+        type: DataTypes.ENUM('artist', 'listener', 'producer'),
+        allowNull: true,
+        defaultValue: null,
       },
       otp: DataTypes.STRING,
       otp_expiry: DataTypes.DATE,
