@@ -5,7 +5,14 @@ const cors = require("cors"); // ⬅️ Import CORS
 const authRoutes = require("./routes/auth.routes");
 
 // Middleware
-app.use(cors()); // ⬅️ Allow CORS for all origins
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "https://poize-music-front.vercel.app"
+  ],
+  credentials: true,
+}));
+
 app.use(express.json());
 
 // Routes
