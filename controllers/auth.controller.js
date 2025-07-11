@@ -30,7 +30,10 @@ exports.login = async (req, res) => {
   });
 
   res.cookie("token", token, {
-    maxAge: 60 * 60 * 1000, // 1 hour
+    httpOnly: true,
+    secure: true,        
+    sameSite: "None",   
+    maxAge: 60 * 60 * 1000,
   });
 
   const { password: _, ...userData } = user.toJSON();
