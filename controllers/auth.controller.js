@@ -29,16 +29,13 @@ exports.login = async (req, res) => {
     expiresIn: "1h",
   });
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,        
-    sameSite: "None",   
-    maxAge: 60 * 60 * 1000,
-  });
-
   const { password: _, ...userData } = user.toJSON();
-  res.json({ user: userData });
+  res.json({
+    token,     // send token here
+    user: userData,
+  });
 };
+
 
 
 exports.sendOTP = async (req, res) => {
