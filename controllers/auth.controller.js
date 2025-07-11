@@ -38,7 +38,7 @@ exports.login = async (req, res) => {
   res.cookie("token", token, {
     httpOnly: true,
     sameSite: isLocalhost ? "Lax" : "None",
-    secure: !isLocalhost, // only true in production
+    secure: !isLocalhost, 
     maxAge: 60 * 60 * 1000,
   });
 
