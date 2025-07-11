@@ -29,17 +29,23 @@ exports.login = async (req, res) => {
     expiresIn: "1h",
   });
 
+  // ✅ Auto-detect if request is from localhost
+  const isLocalhost =
+    req.hostname === 'localhost' ||
+    req.hostname === '127.0.0.1' ||
+    (req.get('host') || '').includes('localhost');
+
   res.cookie("token", token, {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: isLocalhost ? "Lax" : "None",
+    secure: !isLocalhost, // only true in production
     maxAge: 60 * 60 * 1000,
   });
 
   const { password: _, ...userData } = user.toJSON();
-
   res.json({ user: userData });
 };
+
 
 exports.sendOTP = async (req, res) => {
   const { email } = req.body;
