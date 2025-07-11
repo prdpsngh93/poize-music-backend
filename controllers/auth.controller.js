@@ -29,17 +29,8 @@ exports.login = async (req, res) => {
     expiresIn: "1h",
   });
 
-  // ✅ Auto-detect if request is from localhost
-  const isLocalhost =
-    req.hostname === 'localhost' ||
-    req.hostname === '127.0.0.1' ||
-    (req.get('host') || '').includes('localhost');
-
   res.cookie("token", token, {
-    httpOnly: true,
-    sameSite: isLocalhost ? "Lax" : "None",
-    secure: !isLocalhost, 
-    maxAge: 60 * 60 * 1000,
+    maxAge: 60 * 60 * 1000, // 1 hour
   });
 
   const { password: _, ...userData } = user.toJSON();

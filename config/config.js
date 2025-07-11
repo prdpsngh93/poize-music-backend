@@ -14,5 +14,5 @@ module.exports = {
         rejectUnauthorized: false, // For self-signed certificates (Aiven needs this)
       },
     },
-  },
+  }
 };
