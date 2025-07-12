@@ -24,6 +24,35 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
+      profile_image: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      bio: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      primary_genre: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      website_url: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      social_media_url: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      availability: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      is_profile_complete: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      }
     },
     {
       sequelize,

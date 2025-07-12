@@ -36,8 +36,6 @@ exports.login = async (req, res) => {
   });
 };
 
-
-
 exports.sendOTP = async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ where: { email } });
@@ -88,7 +86,6 @@ exports.changePassword = async (req, res) => {
     res.status(400).json({ error: "Invalid or expired token" });
   }
 };
-
 
 exports.updateUserRole = async (req, res) => {
   const authHeader = req.headers.authorization;
