@@ -4,6 +4,8 @@ const app = express();
 const cors = require("cors"); // ⬅️ Import CORS
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
+const artistRoutes = require("./routes/artist.routes");
+
 
 // Middleware
 app.use(cors({
@@ -19,8 +21,8 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
+app.use("/api", artistRoutes);
 
-// Port and Host Info
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || "http://localhost";
 
