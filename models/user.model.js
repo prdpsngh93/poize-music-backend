@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       password: DataTypes.STRING,
       role: {
-        type: DataTypes.ENUM('artist', 'listener', 'producer'),
+        type: DataTypes.ENUM('artist', 'music_lover', 'collaborator', 'venue'),
         allowNull: true,
         defaultValue: null,
       },

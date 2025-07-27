@@ -1,4 +1,5 @@
 const { User } = require("../models");
+const { Collaborator } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
@@ -103,9 +104,27 @@ exports.updateUserRole = async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     await user.update({ role: newRole });
+
+    
+    if (newRole === "collaborator") {
+      const existing = await Collaborator.findOne({ where: { user_id: user.id } });
+      if (!existing) {
+        await Collaborator.create({
+          user_id: user.id,
+          project_id: null,
+          status: "pending",
+          skill_tags: [],
+          social_media_link: null,
+          work_sample: null,
+          short_bio: null,
+          profile_picture: null,
+          location: null
+        });
+      }
+    }
+
     res.json({ message: "User role updated successfully", user });
   } catch (err) {
-    console.error("Error verifying token or updating role:", err);
-    res.status(400).json({ error: "Invalid token or server error" });
+    res.status(500).json({ message: err.message || err.toString() });
   }
 };
