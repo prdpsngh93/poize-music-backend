@@ -55,9 +55,9 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 'private',
       },
       user_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
-      },
+      }
     },
     {
       sequelize,

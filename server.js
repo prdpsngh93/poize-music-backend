@@ -30,6 +30,17 @@ const io = socketIO(server, {
   }
 });
 
+// Middleware
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "https://poize-music-front.vercel.app"
+  ],
+  credentials: true,
+}));
+app.use(express.json());
+
+
 // Keep track of online users
 const onlineUsers = {};
 
@@ -71,15 +82,6 @@ io.on("connection", (socket) => {
   });
 });
 
-// Middleware
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://poize-music-front.vercel.app"
-  ],
-  credentials: true,
-}));
-app.use(express.json());
 
 // API Routes
 app.use("/api/auth", authRoutes);

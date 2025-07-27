@@ -3,11 +3,11 @@
 module.exports = (sequelize, DataTypes) => {
   const Message = sequelize.define('Message', {
     sender_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false
     },
     receiver_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false
     },
     content: {
@@ -23,7 +23,6 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true
   });
 
-  // Optional: Add virtual associations (won't affect User model)
   Message.associate = (models) => {
     Message.belongsTo(models.User, {
       foreignKey: 'sender_id',
