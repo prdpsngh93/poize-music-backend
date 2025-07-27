@@ -3,6 +3,7 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const socketIO = require("socket.io");
+const collaboratorRoutes = require('./routes/collaborators.routes');
 const jwt = require("jsonwebtoken"); // Add for JWT verification
 
 // Routes
@@ -89,6 +90,8 @@ app.use("/api", userRoutes);
 app.use("/api", artistRoutes);
 app.use("/api/collaboration", projectCollaboration);
 app.use('/api/messages', messageRoutes);
+app.use('/api/collaborators', collaboratorRoutes);
+
 
 // Start Server
 const PORT = process.env.PORT || 5000;
