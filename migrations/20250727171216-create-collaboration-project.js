@@ -1,14 +1,13 @@
 'use strict';
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('collaboration_projects', {
       id: {
+        type: Sequelize.UUID,
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER,
+        defaultValue: Sequelize.UUIDV4,
       },
       project_title: {
         type: Sequelize.STRING,
@@ -48,10 +47,10 @@ module.exports = {
         defaultValue: 'private',
       },
       user_id: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'Users', // must match your User table name
+          model: 'Users',
           key: 'id',
         },
         onDelete: 'CASCADE',
