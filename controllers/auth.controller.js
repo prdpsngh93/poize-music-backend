@@ -10,7 +10,7 @@ exports.register = async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hash });
     console.log("user", user)
-    res.status(201).json({ user });
+    res.status(201).json({ user , status:"success" });
   } catch (err) {
     console.log("err", err);
     res.status(400).json({ error: err });
@@ -105,7 +105,7 @@ exports.updateUserRole = async (req, res) => {
 
     await user.update({ role: newRole });
 
-    
+
     if (newRole === "collaborator") {
       const existing = await Collaborator.findOne({ where: { user_id: user.id } });
       if (!existing) {
@@ -123,7 +123,11 @@ exports.updateUserRole = async (req, res) => {
       }
     }
 
-    res.json({ message: "User role updated successfully", user });
+    res.status(200).json({
+      status: "success",
+      message: "User role updated successfully",
+      user
+    });
   } catch (err) {
     res.status(500).json({ message: err.message || err.toString() });
   }
