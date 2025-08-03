@@ -2,13 +2,13 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class User extends Model { }
+  class User extends Model {}
 
   User.init(
     {
       id: {
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4, // Sequelize will auto-generate UUIDs
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
         allowNull: false,
       },
@@ -29,35 +29,6 @@ module.exports = (sequelize, DataTypes) => {
       is_oauth_login: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
-      },
-      profile_image: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      bio: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      primary_genre: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      website_url: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      social_media_url: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      availability: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
-      is_profile_complete: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false,
-        allowNull: false,
       }
     },
     {
