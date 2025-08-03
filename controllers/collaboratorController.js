@@ -1,13 +1,39 @@
-const { Collaborator } = require('../models');
+const { Op } = require("sequelize");
+const { Collaborator, User } = require("../models");
 
-
-// 🔸 Get all collaborators
 exports.getAllCollaborators = async (req, res) => {
   try {
-    const collaborators = await Collaborator.findAll();
-    res.json(collaborators);
+    const { page = 1, limit = 10, search = "" } = req.query;
+    const offset = (page - 1) * limit;
+
+    const whereUser = search
+      ? { name: { [Op.iLike]: `%${search}%` } }
+      : {};
+
+    const { count, rows: collaborators } = await Collaborator.findAndCountAll({
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'email'],
+          where: whereUser
+        }
+      ],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.status(200).json({
+      total: count,
+      page: parseInt(page),
+      totalPages: Math.ceil(count / limit),
+      data: collaborators
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch collaborators', message: err.message });
+    res.status(500).json({
+      error: 'Failed to fetch collaborators',
+      message: err.message
+    });
   }
 };
 

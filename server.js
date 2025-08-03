@@ -15,6 +15,9 @@ const projectCollaboration = require("./routes/collaborationProject.routes");
 const artistRoutes = require("./routes/artist.routes");
 const messageRoutes = require("./routes/messageRoutes");
 const musicLoverRoutes = require('./routes/music_lover.routes');
+const venueGigRoutes = require('./routes/venue_gigs.routes');
+const contributorGigRoutes = require('./routes/gigs_contributer.routes');
+
 
 
 // Socket controller
@@ -97,6 +100,8 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/collaborators', collaboratorRoutes);
 app.use('/api/venues', venueRoutes);
 app.use('/api/music-lovers', musicLoverRoutes);
+app.use('/api/venue-gigs', venueGigRoutes);
+app.use('/api/contributor-gigs', contributorGigRoutes);
 
 
 // Start Server

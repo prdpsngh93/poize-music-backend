@@ -1,24 +1,57 @@
-const { Artist } = require('../models');
+const { Artist , User } = require('../models');
+const { Op } = require("sequelize");
 
-// 🔹 Create Artist
-// exports.createArtist = async (req, res) => {
-//   try {
-//     const artist = await Artist.create(req.body);
-//     res.status(201).json(artist);
-//   } catch (err) {
-//     res.status(400).json({ error: err.message });
-//   }
-// };
 
-// 🔹 Get All Artists
 exports.getAllArtists = async (req, res) => {
   try {
-    const artists = await Artist.findAll();
-    res.json(artists);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+    const genre = req.query.genre || '';
+    const location = req.query.location || '';
+
+    const offset = (page - 1) * limit;
+
+    const whereUser = search
+      ? { name: { [Op.iLike]: `%${search}%` } }
+      : {};
+
+    const whereArtist = {};
+    if (genre) {
+      whereArtist.genre = { [Op.iLike]: `%${genre}%` };
+    }
+    if (location) {
+      whereArtist.location = { [Op.iLike]: `%${location}%` };
+    }
+
+    const { rows: artists, count: total } = await Artist.findAndCountAll({
+      where: whereArtist,
+      include: [
+        {
+          model: User,
+          where: whereUser,
+          attributes: ['id', 'name', 'email'],
+        },
+      ],
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']],
+    });
+
+    return res.status(200).json({
+      data: artists,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+      },
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
+
+
 
 // 🔹 Get Single Artist by ID
 exports.getArtistById = async (req, res) => {

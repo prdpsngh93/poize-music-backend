@@ -1,24 +1,41 @@
-const { MusicLover } = require('../models');
+const { Op } = require('sequelize');
+const { MusicLover, User } = require('../models');
 
-// Create a new MusicLover
-// exports.createMusicLover = async (req, res) => {
-//   try {
-//     const musicLover = await MusicLover.create(req.body);
-//     return res.status(201).json(musicLover);
-//   } catch (error) {
-//     return res.status(400).json({ error: error.message });
-//   }
-// };
-
-// Get all MusicLovers
 exports.getAllMusicLovers = async (req, res) => {
   try {
-    const lovers = await MusicLover.findAll();
-    return res.status(200).json(lovers);
+    const { page = 1, limit = 10, search = '' } = req.query;
+
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await MusicLover.findAndCountAll({
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name'],
+          where: {
+            name: {
+              [Op.iLike]: `%${search}%`, // Case-insensitive search by user's name
+            },
+          },
+          required: true, // Ensures MusicLovers must have a matching User
+        },
+      ],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']],
+    });
+
+    return res.status(200).json({
+      total: count,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(count / limit),
+      lovers: rows,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
+
 
 // Get a MusicLover by ID
 exports.getMusicLoverById = async (req, res) => {

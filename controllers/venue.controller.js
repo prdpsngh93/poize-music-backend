@@ -1,21 +1,39 @@
-const { Venue } = require('../models');
+const { Venue, User } = require('../models');
+const { Op } = require('sequelize');
 
-// // Create a new venue
-// exports.createVenue = async (req, res) => {
-//   try {
-//     const venue = await Venue.create(req.body);
-//     return res.status(201).json(venue);
-//   } catch (error) {
-//     return res.status(400).json({ error: error.message });
-//   }
-// };
-
-// Get all venues
-
+// 🔸 Get all venues with pagination and search (including User.name)
 exports.getAllVenues = async (req, res) => {
   try {
-    const venues = await Venue.findAll();
-    return res.status(200).json(venues);
+    const { page = 1, limit = 10, search = '' } = req.query;
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await Venue.findAndCountAll({
+      where: {
+        [Op.or]: [
+          { venue_name: { [Op.iLike]: `%${search}%` } },
+        ],
+      },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name'],
+          where: {
+            name: { [Op.iLike]: `%${search}%` }, // Search in User name
+          },
+          required: false, // Keep this false to avoid filtering out venues without matching user
+        }
+      ],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['createdAt', 'DESC']],
+    });
+
+    return res.status(200).json({
+      total: count,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(count / limit),
+      venues: rows,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

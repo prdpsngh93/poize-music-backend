@@ -1,5 +1,4 @@
-const { User } = require("../models");
-const { Collaborator } = require("../models");
+const { User  , Artist , Venue  , Collaborator , MusicLover} = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/sendMail");
