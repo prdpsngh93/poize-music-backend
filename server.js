@@ -4,7 +4,9 @@ const http = require("http");
 const cors = require("cors");
 const socketIO = require("socket.io");
 const collaboratorRoutes = require('./routes/collaborators.routes');
-const jwt = require("jsonwebtoken"); // Add for JWT verification
+const jwt = require("jsonwebtoken");
+const venueRoutes = require('./routes/venue.routes');
+
 
 // Routes
 const authRoutes = require("./routes/auth.routes");
@@ -12,6 +14,8 @@ const userRoutes = require("./routes/user.routes");
 const projectCollaboration = require("./routes/collaborationProject.routes");
 const artistRoutes = require("./routes/artist.routes");
 const messageRoutes = require("./routes/messageRoutes");
+const musicLoverRoutes = require('./routes/music_lover.routes');
+
 
 // Socket controller
 const socketController = require("./controllers/socketController");
@@ -87,10 +91,12 @@ io.on("connection", (socket) => {
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
-app.use("/api", artistRoutes);
+app.use("/api/artist", artistRoutes);
 app.use("/api/collaboration", projectCollaboration);
 app.use('/api/messages', messageRoutes);
 app.use('/api/collaborators', collaboratorRoutes);
+app.use('/api/venues', venueRoutes);
+app.use('/api/music-lovers', musicLoverRoutes);
 
 
 // Start Server

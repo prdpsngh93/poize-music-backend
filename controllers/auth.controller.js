@@ -123,6 +123,68 @@ exports.updateUserRole = async (req, res) => {
       }
     }
 
+
+    if (newRole === "venue") {
+      const existing = await Venue.findOne({ where: { user_id: user.id } });
+    
+      if (!existing) {
+        await Venue.create({
+          user_id: user.id,
+          venue_name: "Untitled Venue",
+          venue_description: null,
+          venue_type: null,
+          venue_address: null,
+          venue_logo: null,
+          venue_gallery: [],
+          genre_tags: [],
+          artist_types: [],
+          venue_hours: null,
+          manager_name: null,
+          booking_information: null,
+          venue_capacity: null,
+          contact_phone: null,
+          contact_email: null,
+          available_equipment: [],
+          venue_website: null,
+          is_profile_complete: false
+        });
+      }
+    }
+
+    if (newRole === "music_lover") {
+      const existing = await MusicLover.findOne({ where: { user_id: user.id } });
+    
+      if (!existing) {
+        await MusicLover.create({
+          user_id: user.id,
+          full_name: user.name || "Unnamed Lover", // Assuming `user.name` exists
+          favourite_genre: null,
+          favourite_artist: null,
+          preferred: null,
+          location: null,
+          gigs_near_me: false,
+          artist_updates: false
+        });
+      }
+    }
+    
+    if (newRole === "artist") {
+      const existing = await Artist.findOne({ where: { user_id: user.id } });
+      if (!existing) {
+        await Artist.create({
+          user_id: user.id,
+          stage_name: null,
+          genre: null,
+          bio: null,
+          social_media_links: [],
+          work_samples: [],
+          profile_picture: null,
+          location: null,
+          availability: true
+        });
+      }
+    }
+
     res.status(200).json({
       status: "success",
       message: "User role updated successfully",
