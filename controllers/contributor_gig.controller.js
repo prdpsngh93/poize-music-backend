@@ -1,6 +1,7 @@
 const { ContributorGig } = require('../models');
+const { Op } = require('sequelize');
 
-// Create a new gig
+
 exports.createGig = async (req, res) => {
     try {
         const gig = await ContributorGig.create(req.body);
@@ -11,33 +12,33 @@ exports.createGig = async (req, res) => {
 };
 
 // Get all gigs
+
 exports.getAllGigs = async (req, res) => {
     try {
-        const { page = 1, limit = 10, search = '' } = req.query;
-
-        const offset = (page - 1) * limit;
-
-        const gigs = await ContributorGig.findAndCountAll({
-            where: {
-                name: {
-                    [require('sequelize').Op.iLike]: `%${search}%`,
-                },
-            },
-            limit: parseInt(limit),
-            offset: parseInt(offset),
-            order: [['createdAt', 'DESC']],
-        });
-
-        res.status(200).json({
-            totalItems: gigs.count,
-            totalPages: Math.ceil(gigs.count / limit),
-            currentPage: parseInt(page),
-            items: gigs.rows,
-        });
+      const { page = 1, limit = 10, search = '' } = req.query;
+      const offset = (page - 1) * limit;
+  
+      const gigs = await ContributorGig.findAndCountAll({
+        where: {
+          gig_title: {
+            [Op.iLike]: `%${search}%`,
+          },
+        },
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [['created_at', 'DESC']], // ✅ corrected column
+      });
+  
+      res.status(200).json({
+        totalItems: gigs.count,
+        totalPages: Math.ceil(gigs.count / limit),
+        currentPage: parseInt(page),
+        items: gigs.rows,
+      });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message });
     }
-};
+  };
 
 // Get a single gig by ID
 exports.getGigById = async (req, res) => {
