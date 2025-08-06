@@ -47,9 +47,8 @@ exports.login = async (req, res) => {
           profile = await MusicLover.findOne({ where: { user_id: user.id } });
           break;
       case 'contributor':
-        profile = await Contributor.findOne({ where: { user_id: user.id } });
+        profile = await Collaborator.findOne({ where: { user_id: user.id } });
         break;
-      // add more roles as needed
     }
 
     // 5. Exclude password before sending
