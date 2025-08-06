@@ -52,8 +52,6 @@ exports.getAllArtists = async (req, res) => {
 };
 
 
-
-// 🔹 Get Single Artist by ID
 exports.getArtistById = async (req, res) => {
   try {
     const artist = await Artist.findByPk(req.params.id);
@@ -64,16 +62,17 @@ exports.getArtistById = async (req, res) => {
   }
 };
 
-// 🔹 Update Artist
+
+
 exports.updateArtist = async (req, res) => {
   try {
     const [updated] = await Artist.update(req.body, {
-      where: { id: req.params.id },
+      where: { user_id: req.params.id },
     });
 
     if (!updated) return res.status(404).json({ error: 'Artist not found' });
 
-    const updatedArtist = await Artist.findByPk(req.params.id);
+    const updatedArtist = await Artist.findAnd(req.params.id);
     res.json(updatedArtist);
   } catch (err) {
     res.status(400).json({ error: err.message });

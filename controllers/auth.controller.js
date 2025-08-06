@@ -19,22 +19,55 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ where: { email } });
-  if (!user) return res.status(400).json({ error: "Invalid email" });
+  try {
+    // 1. Find user by email
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(400).json({ error: "Invalid email" });
 
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.status(400).json({ error: "Invalid password" });
+    // 2. Verify password
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ error: "Invalid password" });
 
-  const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
+    // 3. Generate JWT token
+    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
-  const { password: _, ...userData } = user.toJSON();
-  res.json({
-    token,     // send token here
-    user: userData,
-  });
+    // 4. Fetch role-specific profile
+    let profile = null;
+
+    switch (user.role) {
+      case 'venue':
+        profile = await Venue.findOne({ where: { user_id: user.id } });
+        break;
+      case 'artist':
+        profile = await Artist.findOne({ where: { user_id: user.id } });
+        break;
+      case 'MusicLover':
+          profile = await MusicLover.findOne({ where: { user_id: user.id } });
+          break;
+      case 'contributor':
+        profile = await Contributor.findOne({ where: { user_id: user.id } });
+        break;
+      // add more roles as needed
+    }
+
+    // 5. Exclude password before sending
+    const { password: _, ...userData } = user.toJSON();
+
+    // 6. Return response
+    return res.json({
+      token,
+      user: userData,
+      profile, // role-specific profile object
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Login failed', message: err.message });
+  }
 };
+
 
 exports.sendOTP = async (req, res) => {
   const { email } = req.body;
