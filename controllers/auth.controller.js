@@ -105,7 +105,7 @@ exports.updateUserRole = async (req, res) => {
     await user.update({ role: newRole });
 
 
-    if (newRole === "collaborator") {
+    if (newRole === "contributor") {
       const existing = await Collaborator.findOne({ where: { user_id: user.id } });
       if (!existing) {
         await Collaborator.create({

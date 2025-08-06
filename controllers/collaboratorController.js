@@ -37,37 +37,66 @@ exports.getAllCollaborators = async (req, res) => {
   }
 };
 
-// 🔸 Get collaborator by ID
+
 exports.getCollaboratorById = async (req, res) => {
   try {
-    const collaborator = await Collaborator.findByPk(req.params.id);
-    if (!collaborator) return res.status(404).json({ error: 'Collaborator not found' });
+    const collaborator = await Collaborator.findOne({
+      where: { user_id: req.params.id },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'email'], // include any other fields you need
+        },
+      ],
+    });
+
+    if (!collaborator) {
+      return res.status(404).json({ error: 'Collaborator not found' });
+    }
+
     res.json(collaborator);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch collaborator', message: err.message });
   }
 };
 
-// 🔸 Update collaborator by ID
+
+
 exports.updateCollaborator = async (req, res) => {
   try {
-    const [updated] = await Collaborator.update(req.body, {
-      where: { id: req.params.id },
+    const userId = req.params.id;
+    const { name, ...collaboratorFields } = req.body;
+
+    // 1. Update User.name if name is provided
+    if (name) {
+      await User.update({ name }, { where: { id: userId } });
+    }
+
+    // 2. Update Collaborator fields
+    const [updated] = await Collaborator.update(collaboratorFields, {
+      where: { user_id: userId },
     });
 
-    if (!updated) return res.status(404).json({ error: 'Collaborator not found' });
+    if (!updated) {
+      return res.status(404).json({ error: 'Collaborator not found' });
+    }
 
-    const updatedCollaborator = await Collaborator.findByPk(req.params.id);
+    // 3. Return updated result, including user info
+    const updatedCollaborator = await Collaborator.findOne({
+      where: { user_id: userId },
+      include: [{ model: User, attributes: ['id', 'name', 'email'] }]
+    });
+
     res.json(updatedCollaborator);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update collaborator', message: err.message });
   }
 };
 
-// 🔸 Delete collaborator by ID
+
 exports.deleteCollaborator = async (req, res) => {
   try {
-    const deleted = await Collaborator.destroy({ where: { id: req.params.id } });
+    const deleted = await Collaborator.destroy({ where: { user_id: req.params.id } });
     if (!deleted) return res.status(404).json({ error: 'Collaborator not found' });
     res.json({ message: 'Collaborator deleted successfully' });
   } catch (err) {

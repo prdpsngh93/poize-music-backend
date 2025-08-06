@@ -20,10 +20,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       password: DataTypes.STRING,
       role: {
-        type: DataTypes.ENUM('artist', 'music_lover', 'collaborator', 'venue'),
+        type: DataTypes.ENUM('artist', 'music_lover', 'contributor', 'venue'),
         allowNull: true,
         defaultValue: null,
-      },
+      },      
       otp: DataTypes.STRING,
       otp_expiry: DataTypes.DATE,
       is_oauth_login: {
