@@ -1,7 +1,7 @@
 const { Venue, User } = require('../models');
 const { Op } = require('sequelize');
 
-// 🔸 Get all venues with pagination and search (including User.name)
+
 exports.getAllVenues = async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '' } = req.query;
@@ -39,10 +39,18 @@ exports.getAllVenues = async (req, res) => {
   }
 };
 
-// Get a single venue by ID
+
 exports.getVenueById = async (req, res) => {
   try {
-    const venue = await Venue.findByPk(req.params.id);
+    const venue = await Venue.findOne({
+      where: { user_id: req.params.id },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'email'], // include any other fields you need
+        },
+      ],
+    });
     if (!venue) return res.status(404).json({ error: 'Venue not found' });
     return res.status(200).json(venue);
   } catch (error) {
@@ -53,30 +61,52 @@ exports.getVenueById = async (req, res) => {
 // Update a venue
 exports.updateVenue = async (req, res) => {
   try {
-    const [updated] = await Venue.update(req.body, {
-      where: { id: req.params.id },
+    const userId = req.params.id; // Assuming it's user_id
+    const { name, ...venueFields } = req.body;
+
+    // 1. Update User name if provided
+    if (name) {
+      await User.update({ name }, { where: { id: userId } });
+    }
+
+    // 2. Update Venue
+    const [updated] = await Venue.update(venueFields, {
+      where: { user_id: userId },
     });
 
-    if (!updated) return res.status(404).json({ error: 'Venue not found' });
+    if (!updated) {
+      return res.status(404).json({ error: 'Venue not found' });
+    }
 
-    const updatedVenue = await Venue.findByPk(req.params.id);
-    return res.status(200).json(updatedVenue);
+    // 3. Return updated venue with associated user info
+    const updatedVenue = await Venue.findOne({
+      where: { user_id: userId },
+      include: [{ model: User, attributes: ['id', 'name', 'email'] }]
+    });
+
+    res.status(200).json(updatedVenue);
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to update venue', message: error.message });
   }
 };
+
 
 // Delete a venue
 exports.deleteVenue = async (req, res) => {
   try {
+    const userId = req.params.id;
+
     const deleted = await Venue.destroy({
-      where: { id: req.params.id },
+      where: { user_id: userId },
     });
 
-    if (!deleted) return res.status(404).json({ error: 'Venue not found' });
+    if (!deleted) {
+      return res.status(404).json({ error: 'Venue not found for this user' });
+    }
 
-    return res.status(204).send();
+    return res.status(204).send(); // No Content
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: 'Failed to delete venue', message: error.message });
   }
 };
+

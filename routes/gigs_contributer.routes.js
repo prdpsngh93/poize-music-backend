@@ -4,6 +4,7 @@ const contributorGigController = require('../controllers/contributor_gig.control
 
 // Get all gigs with search & pagination
 router.get('/', contributorGigController.getAllGigs);
+router.get('/contributor/:contributorId', contributorGigController.getAllGigs); // 👈 filtered
 
 // Get a single gig by ID
 router.get('/:id', contributorGigController.getGigById);

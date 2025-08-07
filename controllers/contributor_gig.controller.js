@@ -11,22 +11,29 @@ exports.createGig = async (req, res) => {
     }
 };
 
-// Get all gigs
-
 exports.getAllGigs = async (req, res) => {
     try {
       const { page = 1, limit = 10, search = '' } = req.query;
+      const { contributorId } = req.params; // 👈 get contributorId from params
       const offset = (page - 1) * limit;
   
-      const gigs = await ContributorGig.findAndCountAll({
-        where: {
-          gig_title: {
-            [Op.iLike]: `%${search}%`,
-          },
+      // Build where clause dynamically
+      const whereClause = {
+        gig_title: {
+          [Op.iLike]: `%${search}%`,
         },
+      };
+  
+      // If contributorId is passed, add it to filter
+      if (contributorId) {
+        whereClause.collaborator_id = contributorId;
+      }
+  
+      const gigs = await ContributorGig.findAndCountAll({
+        where: whereClause,
         limit: parseInt(limit),
         offset: parseInt(offset),
-        order: [['created_at', 'DESC']], // ✅ corrected column
+        order: [['created_at', 'DESC']],
       });
   
       res.status(200).json({
@@ -39,6 +46,7 @@ exports.getAllGigs = async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   };
+  
 
 // Get a single gig by ID
 exports.getGigById = async (req, res) => {

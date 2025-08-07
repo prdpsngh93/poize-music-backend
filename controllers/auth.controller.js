@@ -136,11 +136,12 @@ exports.updateUserRole = async (req, res) => {
 
     await user.update({ role: newRole });
 
+    let profile = null;
 
     if (newRole === "contributor") {
-      const existing = await Collaborator.findOne({ where: { user_id: user.id } });
-      if (!existing) {
-        await Collaborator.create({
+      profile = await Collaborator.findOne({ where: { user_id: user.id } });
+      if (!profile) {
+        profile = await Collaborator.create({
           user_id: user.id,
           project_id: null,
           status: "pending",
@@ -154,12 +155,10 @@ exports.updateUserRole = async (req, res) => {
       }
     }
 
-
     if (newRole === "venue") {
-      const existing = await Venue.findOne({ where: { user_id: user.id } });
-    
-      if (!existing) {
-        await Venue.create({
+      profile = await Venue.findOne({ where: { user_id: user.id } });
+      if (!profile) {
+        profile = await Venue.create({
           user_id: user.id,
           venue_name: "Untitled Venue",
           venue_description: null,
@@ -183,12 +182,11 @@ exports.updateUserRole = async (req, res) => {
     }
 
     if (newRole === "music_lover") {
-      const existing = await MusicLover.findOne({ where: { user_id: user.id } });
-    
-      if (!existing) {
-        await MusicLover.create({
+      profile = await MusicLover.findOne({ where: { user_id: user.id } });
+      if (!profile) {
+        profile = await MusicLover.create({
           user_id: user.id,
-          full_name: user.name || "Unnamed Lover", // Assuming `user.name` exists
+          full_name: user.name || "Unnamed Lover",
           favourite_genre: null,
           favourite_artist: null,
           preferred: null,
@@ -198,11 +196,11 @@ exports.updateUserRole = async (req, res) => {
         });
       }
     }
-    
+
     if (newRole === "artist") {
-      const existing = await Artist.findOne({ where: { user_id: user.id } });
-      if (!existing) {
-        await Artist.create({
+      profile = await Artist.findOne({ where: { user_id: user.id } });
+      if (!profile) {
+        profile = await Artist.create({
           user_id: user.id,
           stage_name: null,
           genre: null,
@@ -216,11 +214,15 @@ exports.updateUserRole = async (req, res) => {
       }
     }
 
+    const { password: _, ...userData } = user.toJSON(); // Exclude password
+
     res.status(200).json({
       status: "success",
       message: "User role updated successfully",
-      user
+      user: userData,
+      profile
     });
+
   } catch (err) {
     res.status(500).json({ message: err.message || err.toString() });
   }

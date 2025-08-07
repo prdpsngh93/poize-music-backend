@@ -1,4 +1,5 @@
 const { VenueGig } = require('../models');
+const { Op } = require('sequelize');
 
 // Create a new gig
 exports.createGig = async (req, res) => {
@@ -13,8 +14,33 @@ exports.createGig = async (req, res) => {
 // Get all gigs
 exports.getAllGigs = async (req, res) => {
   try {
-    const gigs = await VenueGig.findAll();
-    res.status(200).json(gigs);
+    const { page = 1, limit = 10, search = '' } = req.query;
+    const { venueId } = req.params;
+    const offset = (page - 1) * limit;
+
+    const whereClause = {
+      gig_title: {
+        [Op.iLike]: `%${search}%`,
+      },
+    };
+
+    if (venueId) {
+      whereClause.venue_id = venueId;
+    }
+
+    const gigs = await VenueGig.findAndCountAll({
+      where: whereClause,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['created_at', 'DESC']], // optional: if created_at exists
+    });
+
+    res.status(200).json({
+      totalItems: gigs.count,
+      totalPages: Math.ceil(gigs.count / limit),
+      currentPage: parseInt(page),
+      items: gigs.rows,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
