@@ -55,6 +55,14 @@ module.exports = (sequelize, DataTypes) => {
       location: {
         type: DataTypes.STRING,
         allowNull: true,
+      },
+      venue_type: {  // ✅ New field
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      contributor_role: { // ✅ New field
+        type: DataTypes.STRING,
+        allowNull: true,
       }
     },
     {

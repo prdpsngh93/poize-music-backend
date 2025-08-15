@@ -30,7 +30,7 @@ exports.login = async (req, res) => {
 
     // 3. Generate JWT token
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "365d",
     });
 
     // 4. Fetch role-specific profile

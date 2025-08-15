@@ -1,4 +1,4 @@
-const { ContributorGig } = require('../models');
+const { ContributorGig ,User } = require('../models');
 const { Op } = require('sequelize');
 
 
@@ -12,40 +12,85 @@ exports.createGig = async (req, res) => {
 };
 
 exports.getAllGigs = async (req, res) => {
-    try {
-      const { page = 1, limit = 10, search = '' } = req.query;
-      const { contributorId } = req.params; // 👈 get contributorId from params
-      const offset = (page - 1) * limit;
-  
-      // Build where clause dynamically
-      const whereClause = {
-        gig_title: {
-          [Op.iLike]: `%${search}%`,
-        },
-      };
-  
-      // If contributorId is passed, add it to filter
-      if (contributorId) {
-        whereClause.collaborator_id = contributorId;
-      }
-  
-      const gigs = await ContributorGig.findAndCountAll({
-        where: whereClause,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        order: [['created_at', 'DESC']],
-      });
-  
-      res.status(200).json({
-        totalItems: gigs.count,
-        totalPages: Math.ceil(gigs.count / limit),
-        currentPage: parseInt(page),
-        items: gigs.rows,
-      });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+  try {
+    const { page = 1, limit = 10, search = '', date, venue, status } = req.query; 
+    const { contributorId } = req.params;
+    const offset = (page - 1) * limit;
+
+    // Build where clause dynamically
+    const whereClause = {
+      gig_title: {
+        [Op.iLike]: `%${search}%`,
+      },
+    };
+
+    // contributor filter
+    if (contributorId) {
+      whereClause.collaborator_id = contributorId;
     }
-  };
+
+    // venue filter
+    if (venue) {
+      whereClause.venue = venue; // assuming your model has a 'venue' column
+    }
+
+    // status filter
+    if (status) {
+      whereClause.status = status; // assuming your model has a 'status' column
+    }
+
+    // date filter
+    if (date) {
+      const today = new Date();
+      if (date === "Today") {
+        whereClause.created_at = {
+          [Op.gte]: new Date(today.setHours(0, 0, 0, 0)),
+        };
+      } else if (date === "This Week") {
+        const startOfWeek = new Date();
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        whereClause.created_at = {
+          [Op.gte]: startOfWeek,
+        };
+      } else if (date === "This Month") {
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        whereClause.created_at = {
+          [Op.gte]: startOfMonth,
+        };
+      }
+    }
+
+    const gigs = await ContributorGig.findAndCountAll({
+      where: whereClause,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [["created_at", "DESC"]],
+    });
+
+    const gigsWithArtist = await Promise.all(
+      gigs.rows.map(async (gig) => {
+        const artist = await User.findOne({
+          where: { id: gig.musician_id },
+          attributes: ["name"],
+        });
+        return { ...gig.toJSON(), artist };
+      })
+    );
+
+    res.status(200).json({
+      totalItems: gigs.count,
+      totalPages: Math.ceil(gigs.count / limit),
+      currentPage: parseInt(page),
+      items: gigsWithArtist,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
   
 
 // Get a single gig by ID
