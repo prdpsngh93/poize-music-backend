@@ -54,7 +54,16 @@ exports.getAllArtists = async (req, res) => {
 
 exports.getArtistById = async (req, res) => {
   try {
-    const artist = await Artist.findByPk(req.params.id);
+    const artist = await Artist.findOne({
+      where: { user_id: req.params.id },
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'email'], // include any other fields you need
+        },
+      ],
+    });
+
     if (!artist) return res.status(404).json({ error: 'Artist not found' });
     res.json(artist);
   } catch (err) {
@@ -62,20 +71,34 @@ exports.getArtistById = async (req, res) => {
   }
 };
 
-
-
 exports.updateArtist = async (req, res) => {
   try {
-    const [updated] = await Artist.update(req.body, {
-      where: { user_id: req.params.id },
+    const userId = req.params.id;
+    const { name, ...artistFields } = req.body;
+
+    // 1. Update User.name if provided
+    if (name) {
+      await User.update({ name }, { where: { id: userId } });
+    }
+
+    // 2. Update Artist fields
+    const [updated] = await Artist.update(artistFields, {
+      where: { user_id: userId },
     });
 
-    if (!updated) return res.status(404).json({ error: 'Artist not found' });
+    if (!updated) {
+      return res.status(404).json({ error: 'Artist not found' });
+    }
 
-    const updatedArtist = await Artist.findAnd(req.params.id);
+    // 3. Return updated Artist with User info
+    const updatedArtist = await Artist.findOne({
+      where: { user_id: userId },
+      include: [{ model: User, attributes: ['id', 'name', 'email'] }]
+    });
+
     res.json(updatedArtist);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to update artist', message: err.message });
   }
 };
 
@@ -83,7 +106,7 @@ exports.updateArtist = async (req, res) => {
 exports.deleteArtist = async (req, res) => {
   try {
     const deleted = await Artist.destroy({
-      where: { id: req.params.id },
+      where: { user_id: req.params.id },
     });
 
     if (!deleted) return res.status(404).json({ error: 'Artist not found' });

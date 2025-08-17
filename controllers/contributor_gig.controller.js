@@ -92,6 +92,28 @@ exports.getAllGigs = async (req, res) => {
 };
 
   
+exports.getLatestGigs = async (req, res) => {
+  try {
+    const gigs = await ContributorGig.findAll({
+      where: { status: "active" },
+      limit: 10,
+      order: [["created_at", "DESC"]],
+      include: [
+        {
+          model: User,
+          as: "artist",
+          attributes: ["id", "name", "email"],
+          where: { id: sequelize.col("ContributorGig.musician_id") },
+          required: false,
+        },
+      ],
+    });
+
+    res.status(200).json(gigs);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch latest gigs", message: error.message });
+  }
+};
 
 // Get a single gig by ID
 exports.getGigById = async (req, res) => {
