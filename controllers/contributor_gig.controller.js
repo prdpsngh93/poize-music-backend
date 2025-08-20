@@ -1,5 +1,7 @@
 const { ContributorGig ,User } = require('../models');
 const { Op } = require('sequelize');
+const { sequelize } = require("../models"); // adjust path to your models/index.js
+
 
 
 exports.createGig = async (req, res) => {
@@ -31,7 +33,8 @@ exports.getAllGigs = async (req, res) => {
 
     // venue filter
     if (venue) {
-      whereClause.venue = venue; // assuming your model has a 'venue' column
+      console.log("venue",venue)
+      whereClause.venue_type = venue; // assuming your model has a 'venue' column
     }
 
     // status filter
@@ -95,23 +98,31 @@ exports.getAllGigs = async (req, res) => {
 exports.getLatestGigs = async (req, res) => {
   try {
     const gigs = await ContributorGig.findAll({
-      where: { status: "active" },
-      limit: 10,
+      where: { status: "active" }, // optional filter
+      limit: 5,
       order: [["created_at", "DESC"]],
-      include: [
-        {
-          model: User,
-          as: "artist",
-          attributes: ["id", "name", "email"],
-          where: { id: sequelize.col("ContributorGig.musician_id") },
-          required: false,
-        },
-      ],
     });
 
-    res.status(200).json(gigs);
+    // attach artist details
+    const gigsWithArtist = await Promise.all(
+      gigs.map(async (gig) => {
+        const artist = await User.findOne({
+          where: { id: gig.musician_id },
+          attributes: ["id", "name", "email"],
+        });
+        return { ...gig.toJSON(), artist };
+      })
+    );
+
+    res.status(200).json({
+      totalItems: gigsWithArtist.length,
+      items: gigsWithArtist,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch latest gigs", message: error.message });
+    res.status(500).json({
+      error: "Failed to fetch latest gigs",
+      message: error.message,
+    });
   }
 };
 
