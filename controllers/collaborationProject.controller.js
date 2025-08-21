@@ -16,6 +16,7 @@ exports.createProject = async (req, res) => {
     } = req.body;
 
     const user_id = req.user.id; // Comes from auth middleware
+    console.log("user id",user_id)
 
     const newProject = await CollaborationProject.create({
       project_title,

@@ -1,19 +1,25 @@
-'use strict';
-const { Model } = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   class CollaborationProject extends Model {
     static associate(models) {
       CollaborationProject.belongsTo(models.User, {
-        foreignKey: 'user_id',
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
+        foreignKey: "user_id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       });
     }
   }
 
   CollaborationProject.init(
     {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        allowNull: false,
+      },
       project_title: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -50,19 +56,19 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       visibility: {
-        type: DataTypes.ENUM('private', 'public'),
+        type: DataTypes.ENUM("private", "public"),
         allowNull: false,
-        defaultValue: 'private',
+        defaultValue: "private",
       },
       user_id: {
         type: DataTypes.UUID,
-        allowNull: false,
-      }
+        allowNull: true,
+      },
     },
     {
       sequelize,
-      modelName: 'CollaborationProject',
-      tableName: 'collaboration_projects'
+      modelName: "CollaborationProject",
+      tableName: "collaboration_projects",
     }
   );
 
