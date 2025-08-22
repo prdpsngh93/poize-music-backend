@@ -1,4 +1,4 @@
-const { VenueGig } = require('../models');
+const { VenueGig  , Artist} = require('../models');
 const { Op } = require('sequelize');
 
 // Create a new gig
@@ -108,5 +108,44 @@ exports.deleteGig = async (req, res) => {
     res.status(204).send(); // No content
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+
+exports.changeStatus = async (req, res) => {
+  try {
+    const { artist_id, status, gig_id } = req.body;
+
+    if (!artist_id || !status || !gig_id) {
+      return res.status(400).json({ error: "artist_id, gig_id, and status are required" });
+    }
+
+    // Find gig
+    const gig = await VenueGig.findByPk(gig_id);
+    if (!gig) {
+      return res.status(404).json({ error: "Gig not found" });
+    }
+
+    // Update status of gig
+    gig.status = status;
+    await gig.save();
+
+    // If completed, increment artist's gigs_completed count
+    if (status.toLowerCase() === "completed") {
+      const artist = await Artist.findByPk(artist_id);
+      if (!artist) {
+        return res.status(404).json({ error: "Artist not found" });
+      }
+
+      await artist.increment("gigs_completed", { by: 1 });
+    }
+
+    return res.status(200).json({
+      message: "Status updated successfully",
+      gig,
+    });
+  } catch (error) {
+    console.error("Error in changeStatus:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };

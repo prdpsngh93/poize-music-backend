@@ -8,5 +8,6 @@ router.get('/venue/:venueId', venueGigController.getAllGigs);
 router.get('/:id', venueGigController.getGigById);
 router.put('/:id', venueGigController.updateGig);
 router.delete('/:id', venueGigController.deleteGig);
+router.post('/status' , venueGigController.changeStatus)
 
 module.exports = router;

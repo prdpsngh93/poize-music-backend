@@ -56,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: null,
       },
       booking_details: {
-        type: DataTypes.DATE,
+        type: DataTypes.STRING,
         defaultValue: null,
       },
       venue_id: {
@@ -66,7 +66,12 @@ module.exports = (sequelize, DataTypes) => {
       location: {
         type: DataTypes.STRING,
         allowNull: true,  
-      }
+      },
+      status: {
+        type: DataTypes.STRING,
+        defaultValue: null, 
+      },
+      
   }, {
     sequelize,
     modelName: 'VenueGig',

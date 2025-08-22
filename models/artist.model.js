@@ -29,7 +29,12 @@ module.exports = (sequelize, DataTypes) => {
       genre: DataTypes.STRING,
       website_url: DataTypes.STRING,
       social_media_link: DataTypes.STRING,
-      work_sample: DataTypes.STRING
+      work_sample: DataTypes.STRING,
+      gigs_completed: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+      },
     },
     {
       sequelize,

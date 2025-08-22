@@ -1,4 +1,4 @@
-const { Venue, User } = require('../models');
+const { Venue, User ,VenueGig  } = require('../models');
 const { Op } = require('sequelize');
 
 
@@ -107,6 +107,42 @@ exports.deleteVenue = async (req, res) => {
     return res.status(204).send(); // No Content
   } catch (error) {
     return res.status(500).json({ error: 'Failed to delete venue', message: error.message });
+  }
+};
+
+
+exports.venueDashboard = async (req, res) => {
+  try {
+    const {id: venueId } = req.params;
+
+    if (!venueId) {
+      return res.status(400).json({ error: "venueId is required" });
+    }
+
+    // Count active gigs
+    const activeCount = await VenueGig.count({
+      where: {
+        venue_id: venueId,
+        status: 'active'
+      }
+    });
+
+    // Count draft gigs
+    const draftCount = await VenueGig.count({
+      where: {
+        venue_id: venueId,
+        status: 'draft'
+      }
+    });
+
+    res.status(200).json({
+      venue_id: venueId,
+      active_gigs: activeCount,
+      draft_gigs: draftCount
+    });
+  } catch (error) {
+    console.error("Error in venueDashboard:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
