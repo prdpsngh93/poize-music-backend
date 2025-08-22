@@ -6,6 +6,8 @@ const socketIO = require("socket.io");
 const collaboratorRoutes = require('./routes/collaborators.routes');
 const jwt = require("jsonwebtoken");
 const venueRoutes = require('./routes/venue.routes');
+const venueGigRequestRoutes = require("./routes/venue_gig_request.routes");
+
 
 
 // Routes
@@ -102,6 +104,7 @@ app.use('/api/venues', venueRoutes);
 app.use('/api/music-lovers', musicLoverRoutes);
 app.use('/api/venue-gigs', venueGigRoutes);
 app.use('/api/contributor-gigs', contributorGigRoutes);
+app.use("/api/venue-gig-requests", venueGigRequestRoutes);
 
 
 // Start Server
