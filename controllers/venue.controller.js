@@ -47,7 +47,7 @@ exports.getVenueById = async (req, res) => {
       include: [
         {
           model: User,
-          attributes: ['id', 'name', 'email'], // include any other fields you need
+          attributes: ['id', 'name', 'email'],
         },
       ],
     });

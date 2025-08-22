@@ -2,8 +2,6 @@ const { ContributorGig ,User } = require('../models');
 const { Op } = require('sequelize');
 const { sequelize } = require("../models"); // adjust path to your models/index.js
 
-
-
 exports.createGig = async (req, res) => {
     try {
         const gig = await ContributorGig.create(req.body);
