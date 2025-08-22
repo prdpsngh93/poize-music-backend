@@ -71,6 +71,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         defaultValue: null, 
       },
+      gig_image: {
+        type: DataTypes.STRING,
+        defaultValue: null,
+      },
       
   }, {
     sequelize,
