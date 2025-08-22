@@ -62,8 +62,11 @@ module.exports = (sequelize, DataTypes) => {
       venue_id: {
         type: DataTypes.UUID,
         defaultValue: null,
+      },
+      location: {
+        type: DataTypes.STRING,
+        allowNull: true,  
       }
-      
   }, {
     sequelize,
     modelName: 'VenueGig',

@@ -11,10 +11,9 @@ exports.createGig = async (req, res) => {
   }
 };
 
-// Get all gigs
 exports.getAllGigs = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '' } = req.query;
+    const { page = 1, limit = 10, search = '', genre, dateFilter } = req.query;
     const { venueId } = req.params;
     const offset = (page - 1) * limit;
 
@@ -24,15 +23,41 @@ exports.getAllGigs = async (req, res) => {
       },
     };
 
+    // Filter by venue
     if (venueId) {
       whereClause.venue_id = venueId;
+    }
+
+    // Filter by genre
+    if (genre) {
+      whereClause.genre = genre;
+    }
+
+    // Filter by date range
+    if (dateFilter) {
+      let dateLimit;
+      const now = new Date();
+
+      if (dateFilter === '1w') {
+        dateLimit = new Date(now.setDate(now.getDate() - 7));
+      } else if (dateFilter === '1m') {
+        dateLimit = new Date(now.setMonth(now.getMonth() - 1));
+      } else if (dateFilter === '3m') {
+        dateLimit = new Date(now.setMonth(now.getMonth() - 3));
+      }
+
+      if (dateLimit) {
+        whereClause.date_time = {
+          [Op.gte]: dateLimit,
+        };
+      }
     }
 
     const gigs = await VenueGig.findAndCountAll({
       where: whereClause,
       limit: parseInt(limit),
       offset: parseInt(offset),
-      order: [['created_at', 'DESC']], // optional: if created_at exists
+      order: [['created_at', 'DESC']], 
     });
 
     res.status(200).json({
@@ -45,6 +70,7 @@ exports.getAllGigs = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // Get single gig by ID
 exports.getGigById = async (req, res) => {
