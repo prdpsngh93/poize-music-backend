@@ -103,3 +103,8 @@ exports.deleteCollaborator = async (req, res) => {
     res.status(500).json({ error: 'Failed to delete collaborator', message: err.message });
   }
 };
+
+
+// exports.contributorDashboard = async(req , res ) =>{
+
+// }

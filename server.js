@@ -7,6 +7,7 @@ const collaboratorRoutes = require('./routes/collaborators.routes');
 const jwt = require("jsonwebtoken");
 const venueRoutes = require('./routes/venue.routes');
 const venueGigRequestRoutes = require("./routes/venue_gig_request.routes");
+const Razorpay = require("razorpay");
 
 
 
@@ -90,6 +91,21 @@ io.on("connection", (socket) => {
     delete onlineUsers[socket.user.id];
     io.emit("online_users", onlineUsers);
   });
+});
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+
+app.get("/api/payment/:id", async (req, res) => {
+  try {
+    const payment = await razorpay.payments.fetch(req.params.id);
+    res.json(payment);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 
