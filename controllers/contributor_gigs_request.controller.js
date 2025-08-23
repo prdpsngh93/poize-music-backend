@@ -25,13 +25,16 @@ exports.createRequest = async (req, res) => {
 
 exports.getAllRequests = async (req, res) => {
   try {
-    const { page = 1, limit = 10, music_lover_id } = req.query;
+    const { page = 1, limit = 10, music_lover_id, collaborator_id } = req.query;
     const offset = (page - 1) * limit;
 
     // Build dynamic filter
     const whereClause = {};
     if (music_lover_id) {
       whereClause.music_lover_id = music_lover_id;
+    }
+    if (collaborator_id) {
+      whereClause.collaborator_id = collaborator_id;
     }
 
     // Fetch requests
@@ -49,7 +52,18 @@ exports.getAllRequests = async (req, res) => {
           attributes: ["id", "full_name"],
         });
         const gig = await ContributorGig.findByPk(reqItem.gig_id, {
-          attributes: ["id", "gig_title"],
+          attributes: [
+            "id",
+            "gig_title",
+            "date",
+            "venue_type",
+            "genre",
+            "description",
+            "musician_id",
+            "collaborator_id",
+            "payment",
+            "attachment_url",
+          ],
         });
 
         return {
@@ -71,6 +85,7 @@ exports.getAllRequests = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // READ single request
 exports.getRequestById = async (req, res) => {
