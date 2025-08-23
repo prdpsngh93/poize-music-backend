@@ -1,4 +1,4 @@
-const { VenueGig  , Artist} = require('../models');
+const { VenueGig  , Artist , ContributorGig} = require('../models');
 const { Op } = require('sequelize');
 
 // Create a new gig
@@ -121,7 +121,7 @@ exports.changeStatus = async (req, res) => {
     }
 
     // Find gig
-    const gig = await VenueGig.findByPk(gig_id);
+    const gig = await ContributorGig.findByPk(gig_id);
     if (!gig) {
       return res.status(404).json({ error: "Gig not found" });
     }
