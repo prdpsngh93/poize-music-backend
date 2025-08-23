@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       defaultValue: false,
     },
+    payment_id: {
+      type: DataTypes.STRING,
+      allowNull: true, // ✅ required: false
+    },
   }, {
     tableName: "contributor_gig_requests", // ✅ FIXED to match migration
     timestamps: true,
