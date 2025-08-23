@@ -1,5 +1,5 @@
 // controllers/ContributorGigRequestController.js
-const { ContributorGigRequest } = require("../models");
+const { ContributorGigRequest  ,  MusicLover, ContributorGig} = require("../models");
 
 // CREATE request
 exports.createRequest = async (req, res) => {
@@ -22,11 +22,51 @@ exports.createRequest = async (req, res) => {
   }
 };
 
-// READ all requests
+
 exports.getAllRequests = async (req, res) => {
   try {
-    const requests = await ContributorGigRequest.findAll();
-    res.json(requests);
+    const { page = 1, limit = 10, music_lover_id } = req.query;
+    const offset = (page - 1) * limit;
+
+    // Build dynamic filter
+    const whereClause = {};
+    if (music_lover_id) {
+      whereClause.music_lover_id = music_lover_id;
+    }
+
+    // Fetch requests
+    const { rows, count } = await ContributorGigRequest.findAndCountAll({
+      where: whereClause,
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [["created_at", "DESC"]],
+    });
+
+    // Fetch related manually
+    const data = await Promise.all(
+      rows.map(async (reqItem) => {
+        const musicLover = await MusicLover.findByPk(reqItem.music_lover_id, {
+          attributes: ["id", "full_name"],
+        });
+        const gig = await ContributorGig.findByPk(reqItem.gig_id, {
+          attributes: ["id", "gig_title"],
+        });
+
+        return {
+          ...reqItem.toJSON(),
+          musicLover: musicLover || null,
+          gig: gig || null,
+        };
+      })
+    );
+
+    res.json({
+      total: count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(count / limit),
+      data,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
