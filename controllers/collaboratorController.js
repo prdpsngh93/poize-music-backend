@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Collaborator, User } = require("../models");
+const { Collaborator, User , ContributorGig } = require("../models");
 
 exports.getAllCollaborators = async (req, res) => {
   try {
@@ -104,7 +104,45 @@ exports.deleteCollaborator = async (req, res) => {
   }
 };
 
+exports.contributorDashboard = async (req, res) => {
+  try {
+    const {id: contributorId } = req.params;
 
-// exports.contributorDashboard = async(req , res ) =>{
+    if (!contributorId) {
+      return res.status(400).json({ error: "contributorId is required" });
+    }
 
-// }
+    // Count active gigs
+    const activeCount = await ContributorGig.count({
+      where: {
+        collaborator_id: contributorId,
+        status: 'active'
+      }
+    });
+
+    // Count draft gigs
+    const draftCount = await ContributorGig.count({
+      where: {
+        collaborator_id: contributorId,
+        status: 'draft'
+      }
+    });
+
+    const completedCount = await ContributorGig.count({
+      where:{
+        collaborator_id: contributorId,
+        status: 'completed'
+      }
+    })
+
+    res.status(200).json({
+      collaborator_id: contributorId,
+      active_gigs: activeCount,
+      draft_gigs: draftCount,
+      completed_gigs: completedCount
+    });
+  } catch (error) {
+    console.error("Error in venueDashboard:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

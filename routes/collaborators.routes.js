@@ -5,17 +5,10 @@ const authMiddleware = require("../middlewares/authMiddleware"); // assumes you 
 
 router.use(authMiddleware);
 
-
-// 📄 Get all projects
 router.get("/", collaborator.getAllCollaborators);
-
-// 🔍 Get single project by ID
 router.get("/:id", collaborator.getCollaboratorById);
-
-// ✏️ Update a project
 router.put("/:id", collaborator.updateCollaborator);
-
-// ❌ Delete a project
 router.delete("/:id", collaborator.deleteCollaborator);
+router.get("/contributer-dashboard/:id" , collaborator.contributorDashboard)
 
 module.exports = router;
