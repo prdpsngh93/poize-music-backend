@@ -8,6 +8,8 @@ const jwt = require("jsonwebtoken");
 const venueRoutes = require('./routes/venue.routes');
 const venueGigRequestRoutes = require("./routes/venue_gig_request.routes");
 const Razorpay = require("razorpay");
+const contributorGigsRequestRoutes = require("./routes/contributor_gigs_request.routes");
+
 
 
 
@@ -121,6 +123,7 @@ app.use('/api/music-lovers', musicLoverRoutes);
 app.use('/api/venue-gigs', venueGigRoutes);
 app.use('/api/contributor-gigs', contributorGigRoutes);
 app.use("/api/venue-gig-requests", venueGigRequestRoutes);
+app.use("/api/contributor-gigs-requests", contributorGigsRequestRoutes);
 
 
 // Start Server

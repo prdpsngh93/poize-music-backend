@@ -93,7 +93,6 @@ exports.updateCollaborator = async (req, res) => {
   }
 };
 
-
 exports.deleteCollaborator = async (req, res) => {
   try {
     const deleted = await Collaborator.destroy({ where: { user_id: req.params.id } });
