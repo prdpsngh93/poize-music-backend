@@ -1,3 +1,5 @@
+
+const { Op, fn, col } = require("sequelize");
 const { VenueGigRequest } = require("../models");
 
 
@@ -24,11 +26,63 @@ exports.createRequest = async (req, res) => {
   }
 };
 
-// ✅ Get all requests
 exports.getAllRequests = async (req, res) => {
   try {
     const requests = await VenueGigRequest.findAll();
     return res.status(200).json(requests);
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.getVenueRequest = async (req, res) => {
+  try {
+    const { venueId } = req.params; // assuming you send /requests/:venueId
+    const { page = 1, limit = 10, search = "" } = req.query;
+
+    if (!venueId) {
+      return res.status(400).json({ error: "venueId is required" });
+    }
+
+    const offset = (page - 1) * limit;
+
+    // Apply filters
+    const whereClause = {
+      venue_id: venueId,
+    };
+
+    if (search) {
+      whereClause.title = {
+        [Op.iLike]: `%${search}%`,
+      };
+    }
+
+    // Fetch requests with count of artists per gig
+    const { rows, count } = await VenueGigRequest.findAndCountAll({
+      where: whereClause,
+      attributes: [
+        "id",
+        "gig_id",
+        "artist_id",
+        "title",
+        "message",
+        "venue_id",
+        "status",
+        [fn("COUNT", col("gig_id")), "request_count"], // count per gig
+      ],
+      group: ["VenueGigRequest.id"], // group by id to avoid duplication
+      order: [["created_at", "DESC"]],
+      offset,
+      limit: parseInt(limit),
+    });
+
+    return res.status(200).json({
+      total: count.length || 0,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      data: rows,
+    });
   } catch (error) {
     console.error("Error fetching requests:", error);
     return res.status(500).json({ error: "Internal server error" });
