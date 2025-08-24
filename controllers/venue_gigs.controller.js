@@ -168,10 +168,21 @@ exports.getLatestGigAndRequest = async (req, res) => {
     });
 
     // Fetch latest request
-    const latestRequest = await VenueGigRequest.findOne({
+    let latestRequest = await VenueGigRequest.findOne({
       where: whereClause,
       order: [["created_at", "DESC"]],
     });
+
+    // 👉 If latestRequest exists, fetch its gig to attach gig_image
+    if (latestRequest) {
+      const requestGig = await VenueGig.findByPk(latestRequest.gig_id, {
+        attributes: ["gig_image"],
+      });
+      latestRequest = {
+        ...latestRequest.toJSON(),
+        gig_image: requestGig ? requestGig.gig_image : null,
+      };
+    }
 
     // Fetch all requests for the venue to get artist_ids
     const allRequests = await VenueGigRequest.findAll({

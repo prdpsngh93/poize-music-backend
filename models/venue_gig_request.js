@@ -4,7 +4,6 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class VenueGigRequest extends Model {
     static associate(models) {
-      // ❌ No associations
     }
   }
 
@@ -34,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
       venue_id: {
         type: DataTypes.UUID,
         allowNull: false,
+      },
+      status: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
     },
     {
