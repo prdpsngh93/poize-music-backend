@@ -64,6 +64,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         allowNull: true,
       },
+      artist_id: {
+        type: DataTypes.STRING,
+        allowNull: true, // optional, set false if required
+      },
     },
     {
       sequelize,

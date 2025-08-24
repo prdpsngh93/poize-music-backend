@@ -13,10 +13,10 @@ exports.createProject = async (req, res) => {
       contact_email,
       collaboration_expectations,
       visibility,
+      artist_id
     } = req.body;
 
     const user_id = req.user.id; // Comes from auth middleware
-    console.log("user id",user_id)
 
     const newProject = await CollaborationProject.create({
       project_title,
@@ -29,6 +29,7 @@ exports.createProject = async (req, res) => {
       collaboration_expectations,
       visibility,
       user_id,
+      artist_id
     });
 
     res.status(201).json({ message: 'Project created', data: newProject });
