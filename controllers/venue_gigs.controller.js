@@ -150,6 +150,7 @@ exports.changeStatus = async (req, res) => {
   }
 };
 
+
 exports.getLatestGigAndRequest = async (req, res) => {
   try {
     const { venueId } = req.query; // optional filter
@@ -170,6 +171,20 @@ exports.getLatestGigAndRequest = async (req, res) => {
     const latestRequest = await VenueGigRequest.findOne({
       where: whereClause,
       order: [["created_at", "DESC"]],
+    });
+
+    // Fetch all requests for the venue to get artist_ids
+    const allRequests = await VenueGigRequest.findAll({
+      where: whereClause,
+      attributes: ["artist_id"],
+    });
+
+    // Get unique artist_ids
+    const artistIds = [...new Set(allRequests.map((r) => r.artist_id))];
+
+    // Fetch artist data
+    const artists = await Artist.findAll({
+      where: { id: artistIds },
     });
 
     // Count active gigs
@@ -199,9 +214,10 @@ exports.getLatestGigAndRequest = async (req, res) => {
       activeGigsCount,
       draftGigsCount,
       totalRequestsCount,
+      artists,
     });
   } catch (error) {
-    console.error("Error fetching latest gig and request:", error);
+    console.error("Error fetching latest gig, request, and artists:", error);
     res.status(500).json({ error: error.message });
   }
 };
