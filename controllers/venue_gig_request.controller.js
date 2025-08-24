@@ -177,13 +177,12 @@ exports.getRequestsByGigId = async (req, res) => {
       return res.status(400).json({ error: "gig_id is required" });
     }
 
-    // Step 1: Get all requests for this gig
+    // Step 1: Get all requests for this gig (exclude rejected)
     const requests = await VenueGigRequest.findAll({
-      where: { gig_id , 
-        status: {
-          [Op.ne]: "reject"  // Exclude rejected requests
-        }
-       },
+      where: { 
+        gig_id,
+        status: { [Op.ne]: "reject" }
+      },
     });
 
     if (!requests.length) {
@@ -193,17 +192,34 @@ exports.getRequestsByGigId = async (req, res) => {
     // Step 2: Fetch the gig details
     const gig = await VenueGig.findByPk(gig_id);
 
-    // Step 3: Fetch all artist details
+    // Step 3: Fetch all artist details (with user info)
     const artistIds = requests.map((req) => req.artist_id);
     const artists = await Artist.findAll({
       where: { id: artistIds },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "name", "email"], // fetch artist's name & email
+        },
+      ],
     });
 
-    // Step 4: Build `data` array without repeating gig
+    // Step 4: Build response
     const data = requests.map((req) => {
+      const artist = artists.find((a) => a.id === req.artist_id);
       return {
         ...req.toJSON(),
-        artist: artists.find((a) => a.id === req.artist_id) || null,
+        artist: artist
+          ? {
+              id: artist.id,
+              bio: artist.bio,
+              profile_picture: artist.profile_picture,
+              genre: artist.genre,
+              gigs_completed: artist.gigs_completed,
+              name: artist.User?.name || null, // 👈 artist name from User
+              email: artist.User?.email || null,
+            }
+          : null,
       };
     });
 
