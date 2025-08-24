@@ -90,3 +90,26 @@ exports.deleteRequest = async (req, res) => {
   }
 };
 
+exports.updateRequestStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: "Status is required" });
+    }
+
+    const request = await VenueGigRequest.findByPk(id);
+    if (!request) {
+      return res.status(404).json({ error: "Request not found" });
+    }
+
+    request.status = status;
+    await request.save();
+
+    return res.status(200).json({ message: "Status updated successfully", request });
+  } catch (error) {
+    console.error("Error updating request status:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
