@@ -1,6 +1,6 @@
 
 const { Op, fn, col } = require("sequelize");
-const { VenueGigRequest } = require("../models");
+const { VenueGigRequest , Artist , VenueGig} = require("../models");
 
 
 exports.createRequest = async (req, res) => {
@@ -165,5 +165,50 @@ exports.updateRequestStatus = async (req, res) => {
   } catch (error) {
     console.error("Error updating request status:", error);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+exports.getRequestsByGigId = async (req, res) => {
+  try {
+    const { gig_id } = req.body;
+
+    if (!gig_id) {
+      return res.status(400).json({ error: "gig_id is required" });
+    }
+
+    // Step 1: Get all requests for this gig
+    const requests = await VenueGigRequest.findAll({
+      where: { gig_id },
+    });
+
+    if (!requests.length) {
+      return res.status(404).json({ message: "No requests found for this gig" });
+    }
+
+    // Step 2: Fetch the gig details
+    const gig = await VenueGig.findByPk(gig_id);
+
+    // Step 3: Fetch all artist details
+    const artistIds = requests.map((req) => req.artist_id);
+    const artists = await Artist.findAll({
+      where: { id: artistIds },
+    });
+
+    // Step 4: Build `data` array without repeating gig
+    const data = requests.map((req) => {
+      return {
+        ...req.toJSON(),
+        artist: artists.find((a) => a.id === req.artist_id) || null,
+      };
+    });
+
+    // Final response
+    res.status(200).json({
+      gig: gig || null,
+      data,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
