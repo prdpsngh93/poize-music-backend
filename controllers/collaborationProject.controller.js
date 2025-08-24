@@ -44,13 +44,11 @@ exports.getAllProjects = async (req, res) => {
     const { page = 1, limit = 10, artist_id } = req.query;
     const offset = (page - 1) * limit;
 
-    // Build filter
     const whereClause = {};
     if (artist_id) {
       whereClause.artist_id = artist_id;
     }
 
-    // Fetch projects with pagination & filters
     const { rows, count } = await CollaborationProject.findAndCountAll({
       where: whereClause,
       include: [{ model: User, attributes: ["id", "name", "email"] }],

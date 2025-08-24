@@ -149,3 +149,28 @@ exports.changeStatus = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+exports.getLatestGig = async (req, res) => {
+  try {
+    const { venueId } = req.query; // optional filter
+
+    // Build where clause
+    const whereClause = {};
+    if (venueId) {
+      whereClause.venue_id = venueId;
+    }
+
+    const latestGig = await VenueGig.findOne({
+      where: whereClause,
+      order: [["created_at", "DESC"]],
+    });
+
+    if (!latestGig) {
+      return res.status(404).json({ message: "No gigs found" });
+    }
+
+    res.status(200).json(latestGig);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
