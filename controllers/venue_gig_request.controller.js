@@ -180,8 +180,8 @@ exports.getRequestsByGigId = async (req, res) => {
     // Step 1: Get all requests for this gig (exclude rejected)
     const requests = await VenueGigRequest.findAll({
       where: { 
-        gig_id,
-        status: { [Op.ne]: "reject" }
+        gig_id
+        // status: { [Op.ne]: "reject" }
       },
     });
 
