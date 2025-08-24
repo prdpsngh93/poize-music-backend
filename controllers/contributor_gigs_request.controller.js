@@ -33,10 +33,6 @@ exports.getAllRequests = async (req, res) => {
     if (music_lover_id) {
       whereClause.music_lover_id = music_lover_id;
     }
-    if (collaborator_id) {
-      whereClause.collaborator_id = collaborator_id;
-    }
-
     // Fetch requests
     const { rows, count } = await ContributorGigRequest.findAndCountAll({
       where: whereClause,
@@ -46,7 +42,7 @@ exports.getAllRequests = async (req, res) => {
     });
 
     // Fetch related manually
-    const data = await Promise.all(
+    let data = await Promise.all(
       rows.map(async (reqItem) => {
         const musicLover = await MusicLover.findByPk(reqItem.music_lover_id, {
           attributes: ["id", "full_name"],
@@ -73,6 +69,12 @@ exports.getAllRequests = async (req, res) => {
         };
       })
     );
+
+    if (collaborator_id) {
+      data = data.filter(
+        (item) => item.gig && item.gig.collaborator_id === collaborator_id
+      );
+    }
 
     res.json({
       total: count,
