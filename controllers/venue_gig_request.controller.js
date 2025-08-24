@@ -90,29 +90,3 @@ exports.deleteRequest = async (req, res) => {
   }
 };
 
-
-exports.getLatestRequest = async (req, res) => {
-  try {
-    const { venue_id } = req.query;
-
-    // Build where clause
-    const whereClause = {};
-    if (venue_id) {
-      whereClause.venue_id = venue_id;
-    }
-
-    const latestRequest = await VenueGigRequest.findOne({
-      where: whereClause,
-      order: [["created_at", "DESC"]],
-    });
-
-    if (!latestRequest) {
-      return res.status(404).json({ message: "No requests found" });
-    }
-
-    res.status(200).json(latestRequest);
-  } catch (error) {
-    console.error("Error fetching latest request:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};

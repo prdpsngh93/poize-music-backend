@@ -1,4 +1,4 @@
-const { VenueGig  , Artist , ContributorGig} = require('../models');
+const { VenueGig  , Artist , ContributorGig , VenueGigRequest} = require('../models');
 const { Op } = require('sequelize');
 
 // Create a new gig
@@ -150,7 +150,7 @@ exports.changeStatus = async (req, res) => {
   }
 };
 
-exports.getLatestGig = async (req, res) => {
+exports.getLatestGigAndRequest = async (req, res) => {
   try {
     const { venueId } = req.query; // optional filter
 
@@ -160,17 +160,30 @@ exports.getLatestGig = async (req, res) => {
       whereClause.venue_id = venueId;
     }
 
+    // Fetch latest gig
     const latestGig = await VenueGig.findOne({
       where: whereClause,
       order: [["created_at", "DESC"]],
     });
 
-    if (!latestGig) {
-      return res.status(404).json({ message: "No gigs found" });
+    // Fetch latest request
+    const latestRequest = await VenueGigRequest.findOne({
+      where: whereClause,
+      order: [["created_at", "DESC"]],
+    });
+
+    // Handle no records
+    if (!latestGig && !latestRequest) {
+      return res.status(404).json({ message: "No gigs or requests found" });
     }
 
-    res.status(200).json(latestGig);
+    res.status(200).json({
+      latestGig: latestGig || null,
+      latestRequest: latestRequest || null,
+    });
   } catch (error) {
+    console.error("Error fetching latest gig and request:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
