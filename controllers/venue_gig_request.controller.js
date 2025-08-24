@@ -93,18 +93,48 @@ exports.getVenueRequest = async (req, res) => {
 exports.getRequestById = async (req, res) => {
   try {
     const { id } = req.params;
-    const request = await VenueGigRequest.findByPk(id);
 
+    // Step 1: Find the request
+    const request = await VenueGigRequest.findByPk(id);
     if (!request) {
       return res.status(404).json({ error: "Request not found" });
     }
 
-    return res.status(200).json(request);
+    // Step 2: Fetch gig details
+    const gig = await VenueGig.findByPk(request.gig_id);
+
+    // Step 3: Fetch artist details (with user to get name)
+    const artist = await Artist.findByPk(request.artist_id, {
+      include: [
+        {
+          model: User,
+          attributes: ["id", "name", "email"], // 👈 name will come from User
+        },
+      ],
+    });
+
+    // Step 4: Build response
+    return res.status(200).json({
+      ...request.toJSON(),
+      gig: gig || null,
+      artist: artist
+        ? {
+            id: artist.id,
+            bio: artist.bio,
+            profile_picture: artist.profile_picture,
+            genre: artist.genre,
+            gigs_completed: artist.gigs_completed,
+            name: artist.User?.name || null,
+            email: artist.User?.email || null,
+          }
+        : null,
+    });
   } catch (error) {
     console.error("Error fetching request:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 // ✅ Update request
 exports.updateRequest = async (req, res) => {
