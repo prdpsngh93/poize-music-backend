@@ -41,15 +41,36 @@ exports.createProject = async (req, res) => {
 // Get all projects (public)
 exports.getAllProjects = async (req, res) => {
   try {
-    const projects = await CollaborationProject.findAll({
-      include: [{ model: User, attributes: ['id', 'name', 'email'] }],
+    const { page = 1, limit = 10, artist_id } = req.query;
+    const offset = (page - 1) * limit;
+
+    // Build filter
+    const whereClause = {};
+    if (artist_id) {
+      whereClause.artist_id = artist_id;
+    }
+
+    // Fetch projects with pagination & filters
+    const { rows, count } = await CollaborationProject.findAndCountAll({
+      where: whereClause,
+      include: [{ model: User, attributes: ["id", "name", "email"] }],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [["createdAt", "DESC"]],
     });
 
-    res.status(200).json({ data: projects });
+    res.status(200).json({
+      total: count,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(count / limit),
+      data: rows,
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 // Get a single project by ID
 exports.getProjectById = async (req, res) => {
