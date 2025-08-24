@@ -1,6 +1,6 @@
 
 const { Op, fn, col } = require("sequelize");
-const { VenueGigRequest , Artist , VenueGig} = require("../models");
+const { VenueGigRequest , Artist , VenueGig , User} = require("../models");
 
 
 exports.createRequest = async (req, res) => {
