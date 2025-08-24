@@ -172,18 +172,36 @@ exports.getLatestGigAndRequest = async (req, res) => {
       order: [["created_at", "DESC"]],
     });
 
-    // Handle no records
-    if (!latestGig && !latestRequest) {
-      return res.status(404).json({ message: "No gigs or requests found" });
-    }
+    // Count active gigs
+    const activeGigsCount = await VenueGig.count({
+      where: {
+        ...whereClause,
+        status: "active",
+      },
+    });
+
+    // Count draft gigs
+    const draftGigsCount = await VenueGig.count({
+      where: {
+        ...whereClause,
+        status: "draft",
+      },
+    });
+
+    // Count total requests
+    const totalRequestsCount = await VenueGigRequest.count({
+      where: whereClause,
+    });
 
     res.status(200).json({
       latestGig: latestGig || null,
       latestRequest: latestRequest || null,
+      activeGigsCount,
+      draftGigsCount,
+      totalRequestsCount,
     });
   } catch (error) {
     console.error("Error fetching latest gig and request:", error);
     res.status(500).json({ error: error.message });
   }
 };
-
