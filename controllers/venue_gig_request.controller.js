@@ -171,7 +171,7 @@ exports.updateRequestStatus = async (req, res) => {
 
 exports.getRequestsByGigId = async (req, res) => {
   try {
-    const { gig_id } = req.body;
+    const { gig_id } = req.params;
 
     if (!gig_id) {
       return res.status(400).json({ error: "gig_id is required" });
