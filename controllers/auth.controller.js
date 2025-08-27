@@ -230,7 +230,7 @@ exports.updateUserRole = async (req, res) => {
 };
 
 
-exports.findEmail = () => async (req, res) => {
+exports.findEmail =  async (req, res) => {
   try {
     const { email } = req.body;
 
