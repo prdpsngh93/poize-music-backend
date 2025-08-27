@@ -14,6 +14,8 @@ exports.createRequest = async (req, res) => {
       music_lover_id,
       gig_id,
       payment_status,
+      title,        
+      description,
     });
 
     res.status(201).json(request);
