@@ -22,6 +22,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true, // ✅ required: false
     },
+    performance_terms: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    cancellation_policy: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    payment_terms: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   }, {
     tableName: "contributor_gig_requests", // ✅ FIXED to match migration
     timestamps: true,

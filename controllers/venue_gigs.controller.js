@@ -1,4 +1,4 @@
-const { VenueGig  , Artist , ContributorGig , VenueGigRequest} = require('../models');
+const { VenueGig, Artist, ContributorGig, VenueGigRequest } = require('../models');
 const { Op } = require('sequelize');
 
 // Create a new gig
@@ -57,7 +57,7 @@ exports.getAllGigs = async (req, res) => {
       where: whereClause,
       limit: parseInt(limit),
       offset: parseInt(offset),
-      order: [['created_at', 'DESC']], 
+      order: [['created_at', 'DESC']],
     });
 
     res.status(200).json({
@@ -114,7 +114,7 @@ exports.deleteGig = async (req, res) => {
 
 exports.changeStatus = async (req, res) => {
   try {
-    const { artist_id, status, gig_id } = req.body;
+    const { artist_id, status, gig_id, performance_terms, payment_terms, cancellation_policy } = req.body;
 
     if (!artist_id || !status || !gig_id) {
       return res.status(400).json({ error: "artist_id, gig_id, and status are required" });
@@ -129,6 +129,19 @@ exports.changeStatus = async (req, res) => {
     // Update status of gig
     gig.status = status;
     await gig.save();
+
+    const gigRequest = await ContributorGigRequest.findOne({
+      where: {
+        gig_id: gig_id, music_lover_id: artist_id   
+      }
+    });
+
+    if (gigRequest) {
+      gigRequest.performance_terms = performance_terms || gigRequest.performance_terms;
+      gigRequest.payment_terms = payment_terms || gigRequest.payment_terms;
+      gigRequest.cancellation_policy = cancellation_policy || gigRequest.cancellation_policy;
+      await gigRequest.save();
+    }
 
     // If completed, increment artist's gigs_completed count
     if (status.toLowerCase() === "completed") {
