@@ -1,4 +1,4 @@
-const { VenueGig, Artist, ContributorGig, VenueGigRequest } = require('../models');
+const { VenueGig, Artist, ContributorGig, VenueGigRequest,ContributorGigRequest } = require('../models');
 const { Op } = require('sequelize');
 
 // Create a new gig
