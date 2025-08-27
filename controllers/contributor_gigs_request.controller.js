@@ -4,7 +4,8 @@ const { ContributorGigRequest  ,  MusicLover, ContributorGig} = require("../mode
 // CREATE request
 exports.createRequest = async (req, res) => {
   try {
-    const { music_lover_id, gig_id, payment_status } = req.body;
+    const { music_lover_id, gig_id, payment_status ,  title,        
+      description} = req.body;
 
     if (!music_lover_id || !gig_id) {
       return res.status(400).json({ error: "music_lover_id and gig_id are required" });
