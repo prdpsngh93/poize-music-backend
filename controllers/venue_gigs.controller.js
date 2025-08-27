@@ -145,7 +145,9 @@ exports.changeStatus = async (req, res) => {
 
     // If completed, increment artist's gigs_completed count
     if (status.toLowerCase() === "completed") {
-      const artist = await Artist.findByPk(artist_id);
+      const artist = await Artist.findOne({
+        where: { id: artist_id }
+      });
       if (!artist) {
         return res.status(404).json({ error: "Artist not found" });
       }
