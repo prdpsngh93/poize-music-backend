@@ -9,6 +9,8 @@ const venueRoutes = require('./routes/venue.routes');
 const venueGigRequestRoutes = require("./routes/venue_gig_request.routes");
 const Razorpay = require("razorpay");
 const contributorGigsRequestRoutes = require("./routes/contributor_gigs_request.routes");
+const Stripe = require("stripe");
+const router = express.Router();
 
 
 
@@ -110,6 +112,26 @@ app.get("/api/payment/:id", async (req, res) => {
   }
 });
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+router.post("/create-payment-intent", async (req, res) => {
+  try {
+    const { amount } = req.body; // amount in cents
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency: "usd",
+      automatic_payment_methods: { enabled: true },
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 // API Routes
 app.use("/api/auth", authRoutes);
@@ -124,6 +146,8 @@ app.use('/api/venue-gigs', venueGigRoutes);
 app.use('/api/contributor-gigs', contributorGigRoutes);
 app.use("/api/venue-gig-requests", venueGigRequestRoutes);
 app.use("/api/contributor-gigs-requests", contributorGigsRequestRoutes);
+app.use("/api/stripe", router);
+
 
 
 // Start Server
