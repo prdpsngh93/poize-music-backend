@@ -19,6 +19,11 @@ exports.createRequest = async (req, res) => {
       venue_id,
     });
 
+    await Artist.increment("requests_sent", {
+      by: 1,
+      where: { id: artist_id },
+    });
+
     return res.status(201).json(request);
   } catch (error) {
     console.error("Error creating request:", error);

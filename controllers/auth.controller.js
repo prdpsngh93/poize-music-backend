@@ -150,7 +150,8 @@ exports.updateUserRole = async (req, res) => {
           work_sample: null,
           short_bio: null,
           profile_picture: null,
-          location: null
+          location: null,
+          requests_sent:0
         });
       }
     }
