@@ -3,7 +3,7 @@ const { Notification } = require("../models");
 // Get all unread notifications
 exports.getNotifications = async (req, res) => {
   try {
-    const userId = req.user.id; // assuming you have auth middleware
+    const userId = req.query.id; 
     const notifications = await Notification.findAll({
       where: { reference_id: userId, is_read: false },
       order: [["createdAt", "DESC"]],
