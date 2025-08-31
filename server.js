@@ -24,7 +24,7 @@ const messageRoutes = require("./routes/messageRoutes");
 const musicLoverRoutes = require('./routes/music_lover.routes');
 const venueGigRoutes = require('./routes/venue_gigs.routes');
 const contributorGigRoutes = require('./routes/gigs_contributer.routes');
-
+const notificationRoutes = require("./routes/notification.routes");
 
 
 // Socket controller
@@ -147,7 +147,7 @@ app.use('/api/contributor-gigs', contributorGigRoutes);
 app.use("/api/venue-gig-requests", venueGigRequestRoutes);
 app.use("/api/contributor-gigs-requests", contributorGigsRequestRoutes);
 app.use("/api/stripe", router);
-
+app.use("/api/notifications", notificationRoutes);
 
 
 // Start Server
