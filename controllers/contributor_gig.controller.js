@@ -321,19 +321,30 @@ exports.getAllGigs = async (req, res) => {
 
     let gigsWithArtist = gigs.rows.map(gig => gig.toJSON());
 
-    // 2️⃣ If search includes artist name → fetch matching users
-    if (search) {
-      const users = await User.findAll({
-        where: { name: { [Op.iLike]: `%${search}%` } },
+    // 2️⃣ Collect all unique musician_ids from gigs
+    const musicianIds = gigsWithArtist
+      .map(g => g.musician_id)
+      .filter(id => id); // remove null/undefined
+
+    let users = [];
+    if (musicianIds.length > 0) {
+      users = await User.findAll({
+        where: { id: { [Op.in]: musicianIds } },
         attributes: ["id", "name", "email"]
       });
-
-      gigsWithArtist = gigsWithArtist.map(gig => ({
-        ...gig,
-        // Add any matching artist manually
-        artist: users.length > 0 ? users : null
-      }));
     }
+
+    // 3️⃣ Create a lookup map of users
+    const userMap = {};
+    users.forEach(user => {
+      userMap[user.id] = user.toJSON();
+    });
+
+    // 4️⃣ Attach artist manually to each gig
+    gigsWithArtist = gigsWithArtist.map(gig => ({
+      ...gig,
+      artist: gig.musician_id ? userMap[gig.musician_id] || null : null
+    }));
 
     res.status(200).json({
       totalItems: gigs.count,
@@ -347,8 +358,6 @@ exports.getAllGigs = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 exports.getLatestGigs = async (req, res) => {
   try {
