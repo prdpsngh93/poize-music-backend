@@ -19,11 +19,11 @@ exports.getNotifications = async (req, res) => {
 exports.markAsRead = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
+    const userId = req.query.id;
 
     await Notification.update(
       { is_read: true },
-      { where: { id, user_id: userId } }
+      { where: { id, reference_id: userId } }
     );
 
     res.json({ success: true });
