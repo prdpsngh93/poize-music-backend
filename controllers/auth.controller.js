@@ -211,7 +211,8 @@ exports.updateUserRole = async (req, res) => {
           profile_picture: null,
           location: null,
           availability: true,
-          gigs_completed:0
+          gigs_completed:0,
+          collaboration_post_count:0
         });
       }
     }

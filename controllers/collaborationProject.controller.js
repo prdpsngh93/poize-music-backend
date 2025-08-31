@@ -1,4 +1,4 @@
-const { CollaborationProject, User } = require('../models');
+const { CollaborationProject, User , Artist } = require('../models');
 
 // Create a new project (requires authenticated user)
 exports.createProject = async (req, res) => {
@@ -31,6 +31,11 @@ exports.createProject = async (req, res) => {
       user_id,
       artist_id
     });
+
+    const artist = await Artist.findByPk(artist_id);
+    if (artist) {
+      await artist.increment("collaboration_request_count", { by: 1 });
+    }
 
     res.status(201).json({ message: 'Project created', data: newProject });
   } catch (err) {
