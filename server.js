@@ -113,13 +113,46 @@ app.get("/api/payment/:id", async (req, res) => {
 });
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// router.post("/create-payment-intent", async (req, res) => {
+//   try {
+//     const { amount } = req.body; // amount in cents
+
+//     const paymentIntent = await stripe.paymentIntents.create({
+//       amount,
+//       currency: "usd",
+//       automatic_payment_methods: { enabled: true },
+//     });
+
+//     res.json({
+//       clientSecret: paymentIntent.client_secret,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+
 router.post("/create-payment-intent", async (req, res) => {
   try {
-    const { amount } = req.body; // amount in cents
+    const { amount, currency = "usd" } = req.body; // amount in cents, currency with default
+
+    // Validate required fields
+    if (!amount) {
+      return res.status(400).json({ 
+        error: "Amount is required" 
+      });
+    }
+
+    // Optional: Validate currency format (ISO 4217 codes are 3 characters)
+    if (currency && currency.length !== 3) {
+      return res.status(400).json({ 
+        error: "Currency must be a valid 3-character ISO code (e.g., 'usd', 'eur', 'gbp')" 
+      });
+    }
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
-      currency: "usd",
+      currency: currency.toLowerCase(), // Stripe expects lowercase currency codes
       automatic_payment_methods: { enabled: true },
     });
 
@@ -127,7 +160,7 @@ router.post("/create-payment-intent", async (req, res) => {
       clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Payment Intent Error:", error);
     res.status(500).json({ error: error.message });
   }
 });
