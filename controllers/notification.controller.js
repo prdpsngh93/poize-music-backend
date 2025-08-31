@@ -5,7 +5,7 @@ exports.getNotifications = async (req, res) => {
   try {
     const userId = req.user.id; // assuming you have auth middleware
     const notifications = await Notification.findAll({
-      where: { user_id: userId, is_read: false },
+      where: { reference_id: userId, is_read: false },
       order: [["createdAt", "DESC"]],
     });
     res.json(notifications);
