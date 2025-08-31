@@ -4,7 +4,7 @@ const artistController = require('../controllers/artist.controller');
 const authMiddleware = require("../middlewares/authMiddleware"); // assumes you have this middleware
 
 
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 // router.post('/', artistController.createArtist);
 router.get('/', artistController.getAllArtists);
