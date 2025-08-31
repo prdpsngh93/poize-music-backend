@@ -193,29 +193,34 @@ exports.getAllGigs = async (req, res) => {
 
 exports.getLatestGigs = async (req, res) => {
   try {
-    const { id } = req.query; // contributor id from query param
+    const { id } = req.query; // collaborator id from query param
 
     if (!id) {
-      return res.status(400).json({ error: "Contributor id is required" });
+      return res.status(400).json({ error: "Collaborator id is required" });
     }
 
+    // fetch gigs
     const gigs = await ContributorGig.findAll({
       where: {
         status: "active",
-        contributor_id: id, // filter gigs by contributor
+        collaborator_id: id, // ✅ correct column name
       },
       limit: 5,
-      order: [["created_at", "DESC"]],
+      order: [["created_at", "DESC"]], // ✅ matches your model
     });
 
-    // attach artist details
+    // fetch artist manually for each gig
     const gigsWithArtist = await Promise.all(
       gigs.map(async (gig) => {
         const artist = await User.findOne({
           where: { id: gig.musician_id },
           attributes: ["id", "name", "email"],
         });
-        return { ...gig.toJSON(), artist };
+
+        return {
+          ...gig.toJSON(),
+          artist: artist ? artist.toJSON() : null,
+        };
       })
     );
 
