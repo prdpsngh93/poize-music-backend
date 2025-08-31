@@ -256,36 +256,20 @@ exports.getAllGigs = async (req, res) => {
       }
     }
 
-    // Search functionality
-    const includeArray = [
-      {
-        model: User,
-        as: 'musician',
-        attributes: ["id", "name", "email"],
-        required: false
-      }
-    ];
-
     // Build search conditions
     const searchConditions = [];
     
     if (search) {
-      // Search in gig fields
       searchConditions.push(
         { gig_title: { [Op.iLike]: `%${search}%` } },
         { description: { [Op.iLike]: `%${search}%` } },
         { genre: { [Op.iLike]: `%${search}%` } },
         { venue_type: { [Op.iLike]: `%${search}%` } }
       );
-
-      // Add artist name search to include
-      includeArray[0].where = { name: { [Op.iLike]: `%${search}%` } };
-      includeArray[0].required = false; // Keep as left join for artist search
     }
 
     if (searchConditions.length > 0) {
       if (whereClause[Op.or]) {
-        // If Op.or already exists (from price filter), merge conditions
         whereClause[Op.and] = [
           { [Op.or]: whereClause[Op.or] },
           { [Op.or]: searchConditions }
@@ -296,12 +280,10 @@ exports.getAllGigs = async (req, res) => {
       }
     }
 
-    // Sorting logic - Fixed!
+    // Sorting
     let orderClause;
-    
     switch (sortBy) {
       case 'Price: Low to High': 
-        // Handle null/0 values properly for price sorting
         orderClause = [
           [sequelize.literal('CASE WHEN payment IS NULL OR payment = 0 THEN 0 ELSE CAST(payment AS DECIMAL) END'), 'ASC']
         ]; 
@@ -323,52 +305,49 @@ exports.getAllGigs = async (req, res) => {
       case 'Title Z-A': 
         orderClause = [['gig_title', 'DESC']]; 
         break;
-      case 'Default Sorting':
       default:
         orderClause = [['created_at', 'DESC']];
         break;
     }
 
-    console.log('Applied filters:', { search, venue, status, price, startDate, endDate, sortBy });
-    console.log('Where clause:', JSON.stringify(whereClause, null, 2));
-    console.log('Order clause:', orderClause);
-
+    // 1️⃣ Fetch gigs
     const gigs = await ContributorGig.findAndCountAll({
       where: whereClause,
-      include: includeArray,
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: orderClause,
-      distinct: true,
-      subQuery: false // Important for proper counting with includes
+      distinct: true
     });
 
-    const gigsWithArtist = gigs.rows.map(gig => ({
-      ...gig.toJSON(),
-      artist: gig.musician || null
-    }));
+    let gigsWithArtist = gigs.rows.map(gig => gig.toJSON());
+
+    // 2️⃣ If search includes artist name → fetch matching users
+    if (search) {
+      const users = await User.findAll({
+        where: { name: { [Op.iLike]: `%${search}%` } },
+        attributes: ["id", "name", "email"]
+      });
+
+      gigsWithArtist = gigsWithArtist.map(gig => ({
+        ...gig,
+        // Add any matching artist manually
+        artist: users.length > 0 ? users : null
+      }));
+    }
 
     res.status(200).json({
       totalItems: gigs.count,
       totalPages: Math.ceil(gigs.count / limit),
       currentPage: parseInt(page),
       items: gigsWithArtist,
-      appliedFilters: { 
-        search, 
-        venue, 
-        status, 
-        price, 
-        startDate, 
-        endDate, 
-        sortBy,
-        date 
-      }
+      appliedFilters: { search, venue, status, price, startDate, endDate, sortBy, date }
     });
   } catch (error) {
     console.error("Error in getAllGigs:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 exports.getLatestGigs = async (req, res) => {
