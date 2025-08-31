@@ -32,3 +32,25 @@ exports.markAsRead = async (req, res) => {
     res.status(500).json({ error: "Failed to mark as read" });
   }
 };
+
+exports.createNotification = async (req, res) => {
+  try {
+    const { user_id, type, reference_id, message } = req.body;
+
+    if (!user_id || !type || !message) {
+      return res.status(400).json({ error: "user_id, type, and message are required" });
+    }
+
+    const notification = await Notification.create({
+      user_id,
+      type,
+      reference_id,
+      message,
+    });
+
+    res.status(201).json(notification);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create notification" });
+  }
+};
