@@ -111,6 +111,10 @@ exports.contributorDashboard = async (req, res) => {
       return res.status(400).json({ error: "contributorId is required" });
     }
 
+    const totalCount = await ContributorGig.count({
+      where: { collaborator_id: contributorId }
+    });
+
     // Count active gigs
     const activeCount = await ContributorGig.count({
       where: {
@@ -138,6 +142,7 @@ exports.contributorDashboard = async (req, res) => {
       collaborator_id: contributorId,
       active_gigs: activeCount,
       draft_gigs: draftCount,
+      total_gigs: totalCount,
       completed_gigs: completedCount
     });
   } catch (error) {
