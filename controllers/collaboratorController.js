@@ -37,7 +37,6 @@ exports.getAllCollaborators = async (req, res) => {
   }
 };
 
-
 exports.getCollaboratorById = async (req, res) => {
   try {
     const collaborator = await Collaborator.findOne({
@@ -59,8 +58,6 @@ exports.getCollaboratorById = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch collaborator', message: err.message });
   }
 };
-
-
 
 exports.updateCollaborator = async (req, res) => {
   try {
